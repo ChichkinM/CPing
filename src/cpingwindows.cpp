@@ -6,7 +6,6 @@ CPingWindows::CPingWindows(QObject *parent) : ICPingOS(parent) {
 }
 
 ICPingOS::CPingResult CPingWindows::pingOneIp(QString ip) {
-#ifdef _WIN32
     unsigned long ipaddr = inet_addr(ip.toLatin1().data());;
     char sendData[32] = "Data Buffer";
     LPVOID replyBuffer = NULL;
@@ -29,9 +28,6 @@ ICPingOS::CPingResult CPingWindows::pingOneIp(QString ip) {
     PICMP_ECHO_REPLY echoReply = (PICMP_ECHO_REPLY)replyBuffer;
 
     return (CPingResult)echoReply->Status;
-#else
-    return ICPingOS::OS_NOT_DEFINED;
-#endif
 }
 
 

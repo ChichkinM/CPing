@@ -4,12 +4,10 @@
 #include "icpingos.h"
 #include <stdio.h>
 
-#ifdef _WIN32
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <icmpapi.h>
 #include <windows.h>
-#endif
 
 class CPingWindows :  public ICPingOS
 {
