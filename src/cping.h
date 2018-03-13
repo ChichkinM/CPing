@@ -21,8 +21,8 @@ public:
     void addIp(QString ip);
     void addIp(QVector<QString> ip);
 
-    QVector<QPair<QString, ICPingOS::CPingResult>> pingAllIp();
-    ICPingOS::CPingResult pingOneIp(int index = 0);
+    QVector<ICPingOS::CPingResponse> pingAllIp();
+    ICPingOS::CPingResponse pingOneIp(int index = 0);
     void pingOneIpAsync(int index = 0);
     void pingAllIpAsync();
 
@@ -55,11 +55,11 @@ signals:
     void pingOneIpAsyncStart(QString ip);
 
 
-    void responsePingAllIpAsync(QVector<QPair<QString, ICPingOS::CPingResult>>);
-    void responsePingOneIpAsync(ICPingOS::CPingResult);
+    void responsePingAllIpAsync(QVector<ICPingOS::CPingResponse>);
+    void responsePingOneIpAsync(ICPingOS::CPingResponse);
 
-    void responsePingAllIp(QVector<QPair<QString, ICPingOS::CPingResult>>);
-    void responsePingOneIp(ICPingOS::CPingResult);
+    void responsePingAllIp(QVector<ICPingOS::CPingResponse>);
+    void responsePingOneIp(ICPingOS::CPingResponse);
 };
 
 #endif // CPING_H

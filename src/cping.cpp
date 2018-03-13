@@ -46,10 +46,9 @@ void CPing::init() {
     if (pingAsync != nullptr) {
         pingAsync->moveToThread(&thread);
 
-        qRegisterMetaType<QVector<QPair<QString,ICPingOS::CPingResult>>>
-                ("QVector<QPair<QString,ICPingOS::CPingResult>>");
         qRegisterMetaType<QVector<QString>>("QVector<QString>");
-        qRegisterMetaType<ICPingOS::CPingResult>("ICPingOS::CPingResult");
+        qRegisterMetaType<ICPingOS::CPingResponse>("ICPingOS::CPingResponse");
+        qRegisterMetaType<QVector<ICPingOS::CPingResponse>>("QVector<ICPingOS::CPingResponse>");
 
         connect(&thread, &QThread::finished, pingAsync, &QObject::deleteLater);
         connect(this, &CPing::pingAllIpAsyncStart, pingAsync, &ICPingOS::pingAllIpAsync);
@@ -60,8 +59,8 @@ void CPing::init() {
 }
 
 
-QVector<QPair<QString, ICPingOS::CPingResult>> CPing::pingAllIp() {
-    QVector<QPair<QString, ICPingOS::CPingResult>> result;
+QVector<ICPingOS::CPingResponse> CPing::pingAllIp() {
+    QVector<ICPingOS::CPingResponse> result;
 
     if (ping != nullptr)
         result = ping->pingAllIp(ipAddresses);
@@ -69,8 +68,8 @@ QVector<QPair<QString, ICPingOS::CPingResult>> CPing::pingAllIp() {
     return result;
 }
 
-ICPingOS::CPingResult CPing::pingOneIp(int index) {
-    ICPingOS::CPingResult result = ICPingOS::USING_ERROR;
+ICPingOS::CPingResponse CPing::pingOneIp(int index) {
+    ICPingOS::CPingResponse result;
 
     if (ipAddresses.length() > index) {
         if (ping != nullptr)

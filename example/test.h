@@ -8,39 +8,46 @@ class Test : public QObject {
     Q_OBJECT
 public:
     Test() : QObject() {
-        cping = new CPing({ "8.8.8.8", "8.8.8.9" });
+        cping = new CPing({ "8.8.8.8", "8.8.8.9", "10.7.16.208" });
 
-        connect(cping, SIGNAL(responsePingAllIpAsync(QVector<QPair<QString,ICPingOS::CPingResult>>)), this,
-                SLOT(onResponsePingAllIp(QVector<QPair<QString,ICPingOS::CPingResult>>)));
-        connect(cping, SIGNAL(responsePingAllIp(QVector<QPair<QString,ICPingOS::CPingResult>>)), this,
-                SLOT(onResponsePingAllIp(QVector<QPair<QString,ICPingOS::CPingResult>>)));
-        connect(cping, SIGNAL(responsePingOneIp(ICPingOS::CPingResult)), this,
-                SLOT(onResponsePingOneIp(ICPingOS::CPingResult)));
-        connect(cping, SIGNAL(responsePingOneIpAsync(ICPingOS::CPingResult)), this,
-                SLOT(onResponsePingOneIp(ICPingOS::CPingResult)));
+        connect(cping, SIGNAL(responsePingAllIpAsync(QVector<ICPingOS::CPingResponse>)), this,
+                SLOT(onResponsePingAllIp(QVector<ICPingOS::CPingResponse>)));
+        connect(cping, SIGNAL(responsePingAllIp(QVector<ICPingOS::CPingResponse>)), this,
+                SLOT(onResponsePingAllIp(QVector<ICPingOS::CPingResponse>)));
+        connect(cping, SIGNAL(responsePingOneIp(ICPingOS::CPingResponse)), this,
+                SLOT(onResponsePingOneIp(ICPingOS::CPingResponse)));
+        connect(cping, SIGNAL(responsePingOneIpAsync(ICPingOS::CPingResponse)), this,
+                SLOT(onResponsePingOneIp(ICPingOS::CPingResponse)));
 
-//        cping->pingAllIpAsync();
-//        cping->pingOneIp();
+
+
+//        ICPingOS::CPingResponse r = cping->pingOneIp(2);
+//        qDebug() << r.ip << r.result << r.tripTime;
+
+//        for (ICPingOS::CPingResponse r : cping->pingAllIp())
+//            qDebug() << r.ip << r.result << r.tripTime;
+
 //        cping->pingAllIpAsync();
 //        cping->pingOneIpAsync();
 //        cping->startPingAllIpByTimer(500);
 //        cping->startPingOneIpByTimer(500, 1);
 //        cping->startPingAllIpByTimerAsync(500);
 //        cping->startPingOneIpByTimerAsync(500, 1);
-        qDebug() << "start test";
+
+        qDebug() << "test";
     }
 
 private:
     CPing *cping = nullptr;
 
 private slots:
-    void onResponsePingAllIp(QVector<QPair<QString, ICPingOS::CPingResult>> result) {
-        for (QPair<QString, ICPingOS::CPingResult> r : result)
-            qDebug() << r.first << r.second;
+    void onResponsePingAllIp(QVector<ICPingOS::CPingResponse> result) {
+        for (ICPingOS::CPingResponse r : result)
+            qDebug() << r.ip << r.result << r.tripTime;
     }
 
-    void onResponsePingOneIp(ICPingOS::CPingResult result) {
-            qDebug() << result;
+    void onResponsePingOneIp(ICPingOS::CPingResponse result) {
+            qDebug() << result.ip << result.result << result.tripTime;
     }
 };
 
