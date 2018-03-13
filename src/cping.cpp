@@ -14,23 +14,21 @@ CPing::CPing(QObject *parent) : QObject(parent) {
 
 CPing::CPing(QString ipAddress, QObject *parent) : QObject(parent) {
     init();
-    addIp(ipAddress);
+    ipAddresses.append(ipAddress);
 }
 
 CPing::CPing(QVector<QString> ipAddresses, QObject *parent) : QObject(parent) {
     init();
-    addIp(ipAddresses);
-}
-
-void CPing::addIp(QString ip) {
-    ipAddresses.append(ip);
-}
-
-void CPing::addIp(QVector<QString> ip) {
-    for (QString oneIp : ip)
+    for (QString oneIp : ipAddresses)
         this->ipAddresses.append(oneIp);
 }
 
+CPing::~CPing() {
+    thread.quit();
+    thread.wait();
+
+    delete ping;
+}
 
 void CPing::init() {
 #ifdef _WIN32

@@ -14,12 +14,10 @@ public:
     CPing(QObject *parent = 0);
     CPing(QString ipAddress, QObject *parent = 0);
     CPing(QVector<QString> ipAddresses, QObject *parent = 0);
+    ~CPing();
 
     ICPingOS *ping = nullptr;
     ICPingOS *pingAsync = nullptr;
-
-    void addIp(QString ip);
-    void addIp(QVector<QString> ip);
 
     QVector<ICPingOS::CPingResponse> pingAllIp();
     ICPingOS::CPingResponse pingOneIp(int index = 0);

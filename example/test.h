@@ -37,6 +37,8 @@ public:
         qDebug() << "test";
     }
 
+    ~Test() { delete cping; }
+
 private:
     CPing *cping = nullptr;
 

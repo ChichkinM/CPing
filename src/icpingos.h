@@ -8,7 +8,7 @@
 class ICPingOS : public QObject {
     Q_OBJECT
 public:
-    ICPingOS(QObject *parent = nullptr) : QObject(parent){ }
+    ICPingOS(QObject *parent = nullptr) : QObject(parent) { }
 
     enum CPingResult {
         SUCCESS =                   0,
