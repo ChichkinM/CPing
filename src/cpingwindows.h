@@ -15,8 +15,8 @@ public:
     CPingWindows(QObject *parent = nullptr);
 
 public:
-    CPingResult pingOneIp(QString ip);
-    QVector<QPair<QString, CPingResult>> pingAllIp(QVector<QString> ip);
+    CPingResponse pingOneIp(QString ip);
+    QVector<CPingResponse> pingAllIp(QVector<QString> ip);
 
 public slots:
     void pingAllIpAsync(QVector<QString> ip);

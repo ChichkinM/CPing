@@ -5,7 +5,10 @@ CPingWindows::CPingWindows(QObject *parent) : ICPingOS(parent) {
     
 }
 
-ICPingOS::CPingResult CPingWindows::pingOneIp(QString ip) {
+ICPingOS::CPingResponse CPingWindows::pingOneIp(QString ip) {
+    CPingResponse response;
+    response.ip = ip;
+
     unsigned long ipaddr = inet_addr(ip.toLatin1().data());;
     char sendData[32] = "Data Buffer";
     LPVOID replyBuffer = NULL;
@@ -14,30 +17,31 @@ ICPingOS::CPingResult CPingWindows::pingOneIp(QString ip) {
 
     HANDLE icmpFile = IcmpCreateFile();
     if (icmpFile == INVALID_HANDLE_VALUE)
-        return USING_ERROR; //Unable to open handle
+        return response; //Unable to open handle
 
 
     replySize = sizeof(ICMP_ECHO_REPLY) + sizeof(sendData);
     replyBuffer = (VOID*) malloc(replySize);
     if (replyBuffer == NULL)
-        return USING_ERROR; //Unable to allocate memory
+        return response; //Unable to allocate memory
+
 
     IcmpSendEcho(icmpFile, ipaddr, sendData, sizeof(sendData),
                             NULL, replyBuffer, replySize, 1000);
 
     PICMP_ECHO_REPLY echoReply = (PICMP_ECHO_REPLY)replyBuffer;
 
-    return (CPingResult)echoReply->Status;
+    response.result = (CPingResult)echoReply->Status;
+    response.tripTime = echoReply->RoundTripTime;
+    return response;
 }
 
 
-QVector<QPair<QString, ICPingOS::CPingResult>> CPingWindows::pingAllIp(QVector<QString> ip) {
-    QVector<QPair<QString, ICPingOS::CPingResult>> result;
+QVector<ICPingOS::CPingResponse> CPingWindows::pingAllIp(QVector<QString> ip) {
+    QVector<CPingResponse> result;
 
-    for (QString oneIp : ip) {
-        QPair<QString, ICPingOS::CPingResult> ipResult (oneIp, pingOneIp(oneIp));
-        result.append(ipResult);
-    }
+    for (QString oneIp : ip)
+        result.append(pingOneIp(oneIp));
 
     return result;
 }

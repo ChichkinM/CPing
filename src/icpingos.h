@@ -7,7 +7,6 @@
 
 class ICPingOS : public QObject {
     Q_OBJECT
-
 public:
     ICPingOS(QObject *parent = nullptr) : QObject(parent){ }
 
@@ -37,16 +36,22 @@ public:
         OS_NOT_DEFINED =            13000
     };
 
-    virtual CPingResult pingOneIp(QString ip) = 0;
-    virtual QVector<QPair<QString, CPingResult>> pingAllIp(QVector<QString> ip) = 0;
+    struct CPingResponse {
+        QString ip;
+        CPingResult result = USING_ERROR;
+        int tripTime = -1; //ms
+    };
+
+    virtual CPingResponse pingOneIp(QString ip) = 0;
+    virtual QVector<ICPingOS::CPingResponse> pingAllIp(QVector<QString> ip) = 0;
 
 public slots:
     virtual void pingAllIpAsync(QVector<QString> ip) = 0;
     virtual void pingOneIpAsync(QString ip) = 0;
 
 signals:
-    void responsePingAllIpAsync(QVector<QPair<QString, ICPingOS::CPingResult>>);
-    void responsePingOneIpAsync(ICPingOS::CPingResult);
+    void responsePingAllIpAsync(QVector<ICPingOS::CPingResponse>);
+    void responsePingOneIpAsync(ICPingOS::CPingResponse);
 };
 
 #endif // ICPINGOS_H
