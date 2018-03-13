@@ -7,7 +7,7 @@ HEADERS += \
     $$PWD/cping.h \
     $$PWD/icpingos.h
 
-win {
+win32 {
     LIBS += -liphlpapi -lws2_32
     SOURCES += $$PWD/cpingwindows.cpp
     HEADERS += $$PWD/cpingwindows.h

@@ -12,7 +12,7 @@
 class CPingWindows :  public ICPingOS
 {
 public:
-    CPingWindows(QObject *parent = 0);
+    CPingWindows(QObject *parent = nullptr);
 
 public:
     CPingResult pingOneIp(QString ip);
