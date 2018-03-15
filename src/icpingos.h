@@ -31,6 +31,7 @@ public:
         OPTION_TOO_BIG =            11017,
         BAD_DESTINATION =           11018,
         GENERAL_FAILURE =           11050,
+        ERROR_RESPONSE =            11060,
 
         USING_ERROR =               12000,
         OS_NOT_DEFINED =            13000

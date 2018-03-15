@@ -8,6 +8,7 @@ CPingWindows::CPingWindows(QObject *parent) : ICPingOS(parent) {
 ICPingOS::CPingResponse CPingWindows::pingOneIp(QString ip) {
     CPingResponse response;
     response.ip = ip;
+    response.result = ERROR_RESPONSE;
 
     unsigned long ipaddr = inet_addr(ip.toLatin1().data());;
     char sendData[32] = "Data Buffer";
@@ -26,13 +27,15 @@ ICPingOS::CPingResponse CPingWindows::pingOneIp(QString ip) {
         return response; //Unable to allocate memory
 
 
-    IcmpSendEcho(icmpFile, ipaddr, sendData, sizeof(sendData),
-                            NULL, replyBuffer, replySize, 1000);
+    if (IcmpSendEcho(icmpFile, ipaddr, sendData, sizeof(sendData),
+                     NULL, replyBuffer, replySize, 500) != 0 ) {
 
-    PICMP_ECHO_REPLY echoReply = (PICMP_ECHO_REPLY)replyBuffer;
+        PICMP_ECHO_REPLY echoReply = (PICMP_ECHO_REPLY)replyBuffer;
 
-    response.result = (CPingResult)echoReply->Status;
-    response.tripTime = echoReply->RoundTripTime;
+        response.result = (CPingResult)echoReply->Status;
+        response.tripTime = echoReply->RoundTripTime;
+    }
+
     return response;
 }
 
