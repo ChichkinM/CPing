@@ -1,5 +1,5 @@
 #include "cpinglinux.h"
 
-CPingLinux::CPingLinux() {
+CPingLinux::CPingLinux(QObject *parent) : ICPingOS(parent) {
 
 }

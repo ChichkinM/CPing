@@ -5,6 +5,8 @@
 
 #ifdef _WIN32
 #include "cpingwindows.h"
+#elif __linux__
+#include "cpinglinux.h"
 #endif
 
 
@@ -34,6 +36,9 @@ void CPing::init() {
 #ifdef _WIN32
     ping = new CPingWindows();
     pingAsync = new CPingWindows();
+#elif __linux__
+    ping = new CPingLinux();
+    pingAsync = new CPingLinux();
 #endif
 
     connect(&timerPingOneIp, SIGNAL(timeout()), this, SLOT(pingOneIpByTimer()));
