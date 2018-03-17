@@ -4,10 +4,6 @@
 #include <QtNetwork/QHostAddress>
 #include "icpingos.h"
 
-#define	BUFSIZE		1500
-#define ERR_STRLEN -1
-#define ERR_MEMORY -2
-#define ERR_COPYSTR -3
 
 #pragma pack(push,1)
 struct Ticmp_result
@@ -26,20 +22,14 @@ struct send_data
 };
 #pragma pack(pop)
 
-enum PingStatus
-{
-    SUCCESS,
-    HOST_IS_DOWN,
-    HOST_IS_UNREACHABLE
-};
-
 
 class CPingLinux : public ICPingOS
 {
 public:
     CPingLinux(QObject *parent = nullptr);
+    ~CPingLinux();
 
-    CPingResponse pingOneIp(QString ip);
+    CPingResponse pingOneIp(QString ipAdr);
     QVector<CPingResponse> pingAllIp(QVector<QString> ip){}
 
 public slots:
@@ -47,24 +37,9 @@ public slots:
     void pingOneIpAsync(QString ip){}
 
 private:
+    CPingResult sockError = SUCCESS;
+    int sock;
     unsigned short in_cksum(unsigned short *addr, int len);
-
-
-
-    qint8       isInitOk;
-    QMap<QString, QHostAddress> ethAddress;     // Имя хостов
-    QMap<QString, Ticmp_result> icmp_result;    // Результаты
-    QMap<QString, send_data>  sasend;         // посылка
-
-    char         recvbuf[BUFSIZE];        /*Буффер для приема сообщения*/
-    char         sendbuf[BUFSIZE];        /*Буффер для отправки сообщения*/
-    int         sock;                        /*Сокет*/
-    bool isSTOP;
-    int                 pid;
-    bool send(void);
-    void icmp_error(const char *str, int err);
-//    unsigned short in_cksum(unsigned short *addr, int len);
-
 };
 
 #endif // CPINGLINUX_H
