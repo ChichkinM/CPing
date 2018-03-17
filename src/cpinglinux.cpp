@@ -29,6 +29,9 @@
 
 #include        <netinet/ip_icmp.h>
 
+#include <chrono>
+#include <ctime>
+
 
 
 
@@ -61,9 +64,9 @@ CPingLinux::~CPingLinux() {
     close(sock);
 }
 
-ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAdr) {
+ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAddr) {
     CPingResponse response;
-    response.ip = ipAdr;
+    response.ip = ipAddr;
     response.result = ERROR_RESPONSE;
 
     if (sock < 0) {
@@ -71,75 +74,51 @@ ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAdr) {
         return response;
     }
 
-    char recvbuf[1500]; //TODO: why bufsize == 1500?
-    char sendbuf[1500]; //TODO: why bufsize == 1500?
-
-    //    QMap<QString, QHostAddress> ethAddress;     // Имя хостов
-    QMap<QString, Ticmp_result> icmp_result;    // Результаты
-    /*QMap<QString,*/ send_data/*>*/  sasend;         // посылка
-
-    //    ethAddress.insert("test",QHostAddress("127.0.0.1"));
-    Ticmp_result res;
-    (void) memset(&res, 0, sizeof (Ticmp_result));
-    icmp_result.insert("127.0.0.1",res);
-
-    send_data sendData;
-    sendData.sAdr =new struct sockaddr_in;
-    memset((char *)sendData.sAdr,0x00, sizeof (struct sockaddr_in));
-    sendData.sAdr->sin_family = AF_INET;
-    sendData.sAdr->sin_addr.s_addr = inet_addr(ipAdr.toStdString().c_str());
-    sendData.nSent = 0;
-    sasend = sendData;
 
 
-    int		len;
+
+
+    char recvbuf[1024]; //TODO: why bufsize == 1500?
+    char sendbuf[1024]; //TODO: why bufsize == 1500?
+
+
+
+    struct sockaddr_in sockAddr;
+    sockAddr.sin_family = AF_INET;
+    sockAddr.sin_addr.s_addr = inet_addr(ipAddr.toStdString().c_str());
+
+
+
+    socklen_t 	sa_len = sizeof (struct sockaddr_in);
+
+    int seed = std::chrono::system_clock::now().time_since_epoch().count();
+    qsrand(seed);
+    int icmpPackageId = qrand() % 10000;
+
+
     struct icmp	*icmp = (struct icmp *) sendbuf;
-    socklen_t 	sa_len=sizeof (struct sockaddr_in);
-
-    int pid = 1;
-    icmp = (struct icmp *) sendbuf;
     icmp->icmp_type = ICMP_ECHO;
     icmp->icmp_code = 0;
-    icmp->icmp_id = pid;
+    icmp->icmp_id = icmpPackageId;
     //    icmp->icmp_seq = nsent++;
 
-    //    if(!isInitOk)   return response;
-    //    if(!sock)       return response;
 
-    //for(i=0;i<255;i++)icmp_result[i].SW=0x00;
-    //icmp_result.SW=0x00;
-//    foreach (const QString &str, icmp_result.keys())
-//    {
-//        icmp_result[str].SW=0;
-//    }
+    int len = 64;		/* checksum ICMP header and data */ //TODO: why len is 64?
 
-    if(gettimeofday((struct timeval *) icmp->icmp_data, NULL)==-1)
-    {
-        //        icmp_error("gettimeofday:",errno);
-        return response;
-    }
-
-    len = 64;		/* checksum ICMP header and data */
-
-    //    foreach (const QString &str, sasend.keys())
-    //    {
-    icmp->icmp_seq = sasend.nSent++;
+    icmp->icmp_seq = /*sasend.nSent++*/1;
     icmp->icmp_cksum = 0;
     icmp->icmp_cksum = in_cksum((ushort *) icmp, len);
 
-    int sendtoLen = sendto(sock, sendbuf, len, 0, (sockaddr*)(sasend.sAdr) , sa_len);
+    auto startIcmpPackageTrip = std::chrono::system_clock::now();
+    int sendtoLen = sendto(sock, sendbuf, len, 0, (sockaddr*) &sockAddr , sa_len);
 
-    qDebug() << sendtoLen;
-
-    if(sendtoLen!=len)
+    if(sendtoLen != len)
     {
-        //icmp_error("ping sendto:",errno);
-
         if(errno == EHOSTDOWN)
-            qDebug() << ipAdr << "HOST_IS_DOWN";
+            qDebug() << ipAddr << "HOST_IS_DOWN";
         //                 emit resultPing(QHostAddress(str), HOST_IS_DOWN);
         else if(errno == EHOSTUNREACH)
-            qDebug() << ipAdr << "HOST_IS_UNREACHABLE";
+            qDebug() << ipAddr << "HOST_IS_UNREACHABLE";
         //                emit resultPing(QHostAddress(str), HOST_IS_UNREACHABLE);
 
         qDebug() << "sendto error" << errno;
@@ -150,23 +129,18 @@ ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAdr) {
     struct sockaddr  sarecv;
 
     for (;;) {
-        len=recvfrom(sock, recvbuf, sizeof(recvbuf), 0,&sarecv, &sa_len);
+        len = recvfrom(sock, recvbuf, sizeof(recvbuf), 0, &sarecv, &sa_len);
         if (len < 0) {
             if (errno == EINTR)
                 continue;
-            //icmp_error("recvfrom: ",errno);
+
             usleep(500000); //TODO: config delay
             continue;
         }
 
 
         int			hlen1, icmplen;
-        double			rtt;
         struct ip		*ip;
-        struct icmp		*icmp;
-        struct timeval	*tvsend;
-
-        //struct sockaddr_in	*sin = (struct sockaddr_in *) sarecv;
 
         ip = (struct ip *) recvbuf;		/* start of IP header */
         hlen1 = ip->ip_hl << 2;		/* length of IP header */
@@ -177,46 +151,19 @@ ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAdr) {
 
         if (icmp->icmp_type == ICMP_ECHOREPLY)
         {
-            if (icmp->icmp_id != pid)
-            {
-                continue ;		/* not a response to our ECHO_REQUEST */
-            }
-
-            if (icmplen < 16)
-            {
-                //                icmp_error("icmplen: < 16", icmplen);
+            if (icmp->icmp_id != icmpPackageId || icmplen < 16)
                 continue ;
-            }
-            tvsend = (struct timeval *) icmp->icmp_data;
 
-            //                if(ptval && tvsend)
-            //                {
-            //                    timersub(ptval, tvsend,ptval);
-            //                    rtt = ptval->tv_sec * 1000.0 + ptval->tv_usec / 1000.0;
-            //                }
 
-            QHostAddress recv_adr(&sarecv);
+            if (QHostAddress(&sarecv).toString() == ipAddr) {
+                auto endIcmpPackageTrip = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsedSeconds = endIcmpPackageTrip - startIcmpPackageTrip;
 
-            if (recv_adr.toString() == ipAdr)
-//            if(icmp_result.contains(recv_adr.toString()))
-            {
-//                Ticmp_result res;
-                //                mtx.lock();
-//                res.SW=icmp_result[recv_adr.toString()].SW = 0x80;
-//                res.rtt=icmp_result[recv_adr.toString()].rtt = rtt;
-//                res.seq=icmp_result[recv_adr.toString()].seq = icmp->icmp_seq;
-                //                mtx.unlock();
-                //                emit resultPing(recv_adr, SUCCESS);
-                qDebug() << "ok";
                 response.result = SUCCESS;
+                response.tripTime = elapsedSeconds.count() * 1000;
 
-
-            }else
-            {
-                qDebug()<<"Recive ICMP answer from "<<recv_adr<<" "<<ip;
+                break;
             }
-
-            break;
         }
     }
 

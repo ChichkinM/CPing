@@ -5,31 +5,13 @@
 #include "icpingos.h"
 
 
-#pragma pack(push,1)
-struct Ticmp_result
-{
-    quint8      SW; //слово состояния
-    quint32 	seq;//
-    double		rtt;//время прохождения команды
-};
-#pragma pack(pop)
-
-#pragma pack(push,1)
-struct send_data
-{
-    struct sockaddr_in  *sAdr;
-    quint32             nSent;			/*Счетчик для посылок add 1 for each sendto() */
-};
-#pragma pack(pop)
-
-
 class CPingLinux : public ICPingOS
 {
 public:
     CPingLinux(QObject *parent = nullptr);
     ~CPingLinux();
 
-    CPingResponse pingOneIp(QString ipAdr);
+    CPingResponse pingOneIp(QString ipAddr);
     QVector<CPingResponse> pingAllIp(QVector<QString> ip){}
 
 public slots:
