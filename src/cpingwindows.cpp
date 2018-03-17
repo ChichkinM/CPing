@@ -26,7 +26,7 @@ ICPingOS::CPingResponse CPingWindows::pingOneIp(QString ip) {
     if (replyBuffer == NULL)
         return response; //Unable to allocate memory
 
-
+    //TODO: how timeout works with unreachable ip?
     if (IcmpSendEcho(icmpFile, ipaddr, sendData, sizeof(sendData),
                      NULL, replyBuffer, replySize, 500) != 0 ) {
 
