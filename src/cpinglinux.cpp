@@ -128,13 +128,19 @@ ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAddr) {
 
     struct sockaddr  sarecv;
 
+    int noResponseCounter = 0;
+
     for (;;) {
         len = recvfrom(sock, recvbuf, sizeof(recvbuf), 0, &sarecv, &sa_len);
         if (len < 0) {
-            if (errno == EINTR)
-                continue;
+            noResponseCounter++;
 
-            usleep(500000); //TODO: config delay
+            if (noResponseCounter == 2) {
+                response.result = ERROR_RESPONSE;
+                return response;
+            }
+
+            usleep(250000); //TODO: config delay
             continue;
         }
 
