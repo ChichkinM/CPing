@@ -21,8 +21,8 @@ public:
 
 
 
-//        ICPingOS::CPingResponse r = cping->pingOneIp(2);
-//        qDebug() << r.ip << r.result << r.tripTime;
+        ICPingOS::CPingResponse r = cping->pingOneIp(2);
+        qDebug() << r.ip << r.result << r.tripTime;
 
 //        for (ICPingOS::CPingResponse r : cping->pingAllIp())
 //            qDebug() << r.ip << r.result << r.tripTime;
