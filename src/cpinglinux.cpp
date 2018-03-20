@@ -121,7 +121,7 @@ ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAddr) {
             qDebug() << ipAddr << "HOST_IS_UNREACHABLE";
         //                emit resultPing(QHostAddress(str), HOST_IS_UNREACHABLE);
 
-        qDebug() << "sendto error" << errno;
+//        qDebug() << "sendto error" << errno;
     }
 
 
@@ -174,6 +174,23 @@ ICPingOS::CPingResponse CPingLinux::pingOneIp(QString ipAddr) {
     }
 
     return response;
+}
+
+QVector<ICPingOS::CPingResponse> CPingLinux::pingAllIp(QVector<QString> ip) {
+    QVector<CPingResponse> result;
+
+    for (QString oneIp : ip)
+        result.append(pingOneIp(oneIp));
+
+    return result;
+}
+
+void CPingLinux::pingAllIpAsync(QVector<QString> ip) {
+    emit responsePingAllIpAsync(pingAllIp(ip));
+}
+
+void CPingLinux::pingOneIpAsync(QString ip) {
+    emit responsePingOneIpAsync(pingOneIp(ip));
 }
 
 unsigned short CPingLinux::in_cksum(unsigned short *addr, int len)

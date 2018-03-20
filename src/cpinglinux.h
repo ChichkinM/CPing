@@ -12,11 +12,11 @@ public:
     ~CPingLinux();
 
     CPingResponse pingOneIp(QString ipAddr);
-    QVector<CPingResponse> pingAllIp(QVector<QString> ip){}
+    QVector<CPingResponse> pingAllIp(QVector<QString> ip);
 
 public slots:
-    void pingAllIpAsync(QVector<QString> ip){}
-    void pingOneIpAsync(QString ip){}
+    void pingAllIpAsync(QVector<QString> ip);
+    void pingOneIpAsync(QString ip);
 
 private:
     CPingResult sockError = SUCCESS;
