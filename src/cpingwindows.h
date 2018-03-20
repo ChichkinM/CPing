@@ -14,7 +14,6 @@ class CPingWindows :  public ICPingOS
 public:
     CPingWindows(QObject *parent = nullptr);
 
-public:
     CPingResponse pingOneIp(QString ip);
     QVector<CPingResponse> pingAllIp(QVector<QString> ip);
 

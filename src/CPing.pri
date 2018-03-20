@@ -12,3 +12,8 @@ win32 {
     SOURCES += $$PWD/cpingwindows.cpp
     HEADERS += $$PWD/cpingwindows.h
 }
+
+linux {
+    SOURCES += $$PWD/cpinglinux.cpp
+    HEADERS += $$PWD/cpinglinux.h
+}

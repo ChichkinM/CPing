@@ -34,8 +34,22 @@ public:
         ERROR_RESPONSE =            11060,
 
         USING_ERROR =               12000,
-        OS_NOT_DEFINED =            13000
+        OS_NOT_DEFINED =            13000,
+
+
+        LINUX_SOCK_ERR_EINVAL =         14001,
+        LINUX_SOCK_ERR_ENOMEM =         14002,
+        LINUX_SOCK_ERR_ENOBUFS =        14003,
+        LINUX_SOCK_ERR_EACCES =         14004,
+        LINUX_SOCK_ERR_ENFILE =         14005,
+        LINUX_SOCK_ERR_EMFILE =         14006,
+        LINUX_SOCK_ERR_EPROTONOSUPPORT= 14007,
+        LINUX_SOCK_ERR_EPREM =          14008,
+        LINUX_SOCK_ERR_UNNOWN =         14009,
+
+        LINUX_SOCK_OPT_ERROR =          14020
     };
+
 
     struct CPingResponse {
         QString ip;
