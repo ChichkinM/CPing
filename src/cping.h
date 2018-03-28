@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QThreadPool>
 #include <QVector>
 #include <QTimer>
 #include "icpingos.h"
@@ -22,7 +23,7 @@ public:
     QVector<ICPingOS::CPingResponse> pingAllIp();
     ICPingOS::CPingResponse pingOneIp(int index = 0);
     void pingOneIpAsync(int index = 0);
-    void pingAllIpAsync();
+    void pingAllIpAsync(unsigned int threads = 1);
 
     void startPingOneIpByTimer(int interval, int index = 0);
     void startPingOneIpByTimerAsync(int interval, int index = 0);
@@ -32,6 +33,7 @@ public:
 private:
     void init();
 
+    QThreadPool threadPool;
     QThread thread;
     QVector<QString> ipAddresses;
 

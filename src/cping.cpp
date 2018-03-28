@@ -15,14 +15,14 @@ CPing::CPing(QObject *parent) : QObject(parent) {
 }
 
 CPing::CPing(QString ipAddress, QObject *parent) : QObject(parent) {
-    init();
     ipAddresses.append(ipAddress);
+    init();
 }
 
 CPing::CPing(QVector<QString> ipAddresses, QObject *parent) : QObject(parent) {
-    init();
     for (QString oneIp : ipAddresses)
         this->ipAddresses.append(oneIp);
+    init();
 }
 
 CPing::~CPing() {
@@ -45,6 +45,8 @@ void CPing::init() {
     connect(&timerPingAllIp, SIGNAL(timeout()), this, SLOT(pingAllIpByTimer()));
     connect(&timerPingAllIpAsync, SIGNAL(timeout()), this, SLOT(pingAllIpByTimerAsync()));
     connect(&timerPingOneIpAsync, SIGNAL(timeout()), this, SLOT(pingOneIpByTimerAsync()));
+
+    //    for(int i = 0; i < pingsAsync.length(); i++) {
 
     if (pingAsync != nullptr) {
         pingAsync->moveToThread(&thread);
@@ -82,10 +84,39 @@ ICPingOS::CPingResponse CPing::pingOneIp(int index) {
     return result;
 }
 
-void CPing::pingAllIpAsync() {
-    if (!thread.isRunning())
-        thread.start();
-    emit pingAllIpAsyncStart(ipAddresses);
+void CPing::pingAllIpAsync(unsigned int threads) {
+    if (threads > 0) {
+        threadPool.setMaxThreadCount(threads);
+
+        int ipCountForDefThread = ipAddresses.count() / threads;
+
+        for(int i = 0; i < threads; i++) {
+#ifdef _WIN32
+            CPingWindows *p = new CPingWindows();
+#elif __linux__
+            CPingLinux *p = new CPingLinux();
+#endif
+
+            connect(p, &ICPingOS::responsePingAllIpAsync, this, &CPing::responsePingAllIpAsync);
+            connect(p, &ICPingOS::responsePingOneIpAsync, this, &CPing::responsePingOneIpAsync);
+
+            QVector<QString> ip;
+            int additionalIpCount = ipAddresses.count() % threads;
+            if (i == 0)
+                ip << ipAddresses.mid(i, ipCountForDefThread + additionalIpCount);
+            else
+                ip << ipAddresses.mid(i + additionalIpCount, ipCountForDefThread);
+
+            qDebug() << ip;
+
+            p->setIpForPing(ip);
+            threadPool.globalInstance()->start(p);
+        }
+    }
+
+    //    if (!thread.isRunning())
+    //        thread.start();
+    //    emit pingAllIpAsyncStart(ipAddresses);
 }
 
 void CPing::pingOneIpAsync(int index) {

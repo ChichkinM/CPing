@@ -27,7 +27,7 @@ public:
 //        for (ICPingOS::CPingResponse r : cping->pingAllIp())
 //            qDebug() << r.ip << r.result << r.tripTime;
 
-//        cping->pingAllIpAsync();
+        cping->pingAllIpAsync(2);
 //        cping->pingOneIpAsync();
 //        cping->startPingAllIpByTimer(500);
 //        cping->startPingOneIpByTimer(500, 1);

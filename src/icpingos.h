@@ -4,8 +4,9 @@
 #include <QObject>
 #include <QPair>
 #include <QVector>
-
-class ICPingOS : public QObject {
+#include <QRunnable>
+#include <QDebug>
+class ICPingOS : public QObject, public QRunnable {
     Q_OBJECT
 public:
     ICPingOS(QObject *parent = nullptr) : QObject(parent) { }
@@ -57,8 +58,16 @@ public:
         int tripTime = -1; //ms
     };
 
+    void run() { pingAllIpAsync(ipForPing); }
+    bool autoDelete() const { return true; }
+
+    void setIpForPing(QVector<QString> ip) { ipForPing = ip; }
+
     virtual CPingResponse pingOneIp(QString ip) = 0;
     virtual QVector<ICPingOS::CPingResponse> pingAllIp(QVector<QString> ip) = 0;
+
+private:
+    QVector<QString> ipForPing;
 
 public slots:
     virtual void pingAllIpAsync(QVector<QString> ip) = 0;
