@@ -2,7 +2,6 @@
 #define CPING_H
 
 #include <QObject>
-#include <QThread>
 #include <QThreadPool>
 #include <QVector>
 #include <QTimer>
@@ -18,7 +17,8 @@ public:
     ~CPing();
 
     ICPingOS *ping = nullptr;
-    ICPingOS *pingAsync = nullptr;
+//    ICPingOS *pingAsync = nullptr;
+    QVector<ICPingOS*> pings;
 
     QVector<ICPingOS::CPingResponse> pingAllIp();
     ICPingOS::CPingResponse pingOneIp(int index = 0);
@@ -34,7 +34,6 @@ private:
     void init();
 
     QThreadPool threadPool;
-    QThread thread;
     QVector<QString> ipAddresses;
 
     int indexIpAdrForTimerPingOneIp = 0;

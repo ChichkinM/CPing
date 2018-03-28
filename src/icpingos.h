@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QRunnable>
 #include <QDebug>
+
 class ICPingOS : public QObject, public QRunnable {
     Q_OBJECT
 public:
@@ -59,9 +60,7 @@ public:
     };
 
     void run() { pingAllIpAsync(ipForPing); }
-    bool autoDelete() const { return true; }
-
-    void setIpForPing(QVector<QString> ip) { ipForPing = ip; }
+    void setIpForAsyncPing(QVector<QString> ip) { ipForPing = ip; }
 
     virtual CPingResponse pingOneIp(QString ip) = 0;
     virtual QVector<ICPingOS::CPingResponse> pingAllIp(QVector<QString> ip) = 0;
