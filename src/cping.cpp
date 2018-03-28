@@ -56,12 +56,20 @@ void CPing::init() {
     ping = new CPingWindows();
 #elif __linux__
     ping = new CPingLinux();
+    ping->setAutoDelete(false);
 #endif
 
-    connect(&timerPingOneIp, SIGNAL(timeout()), this, SLOT(pingOneIpByTimer()));
-    connect(&timerPingAllIp, SIGNAL(timeout()), this, SLOT(pingAllIpByTimer()));
-    connect(&timerPingAllIpAsync, SIGNAL(timeout()), this, SLOT(pingAllIpByTimerAsync()));
-    connect(&timerPingOneIpAsync, SIGNAL(timeout()), this, SLOT(pingOneIpByTimerAsync()));
+    connect(ping, &ICPingOS::responsePingAllIpAsync, this, &CPing::responsePingAllIpAsync);
+    connect(ping, &ICPingOS::responsePingOneIpAsync, this, &CPing::responsePingOneIpAsync);
+
+    connect(&timerPingAllIpAsync, &QTimer::timeout, this, [this](){ pingAllIpAsync(3); });
+    connect(&timerPingOneIpAsync, &QTimer::timeout, this, [this](){ pingOneIpAsync(indexIpAdrForTimerPingOneIpAsync); });
+    connect(&timerPingOneIp, &QTimer::timeout, this, [this](){
+        emit responsePingOneIp(
+                    pingOneIp(indexIpAdrForTimerPingOneIp)); });
+    connect(&timerPingAllIp, &QTimer::timeout, this, [this](){
+        emit responsePingAllIp(
+                    pingAllIp()); });
 }
 
 
@@ -110,6 +118,7 @@ void CPing::pingAllIpAsync(unsigned int threads) {
 void CPing::pingOneIpAsync(int index) {
     if (ipAddresses.length() > index) {
         ping->setIpForAsyncPing({ipAddresses.at(index)});
+        qDebug() << "start";
         threadPool.start(ping);
     }
 }
@@ -123,8 +132,8 @@ void CPing::startPingOneIpByTimer(int interval, int index) {
 
 void CPing::startPingOneIpByTimerAsync(int interval, int index) {
     if (!timerPingOneIpAsync.isActive() && ipAddresses.length() > index) {
-        timerPingOneIpAsync.start(interval);
         indexIpAdrForTimerPingOneIpAsync = index;
+        timerPingOneIpAsync.start(interval);
     }
 }
 
@@ -136,23 +145,4 @@ void CPing::startPingAllIpByTimer(int interval) {
 void CPing::startPingAllIpByTimerAsync(int interval) {
     if (!timerPingAllIpAsync.isActive())
         timerPingAllIpAsync.start(interval);
-}
-
-void CPing::pingOneIpByTimer() {
-    emit responsePingOneIp(
-                pingOneIp(indexIpAdrForTimerPingOneIp));
-}
-
-void CPing::pingOneIpByTimerAsync() {
-    pingOneIpAsync(indexIpAdrForTimerPingOneIpAsync);
-
-}
-
-void CPing::pingAllIpByTimer() {
-    emit responsePingAllIp(
-                pingAllIp());
-}
-
-void CPing::pingAllIpByTimerAsync() {
-    pingAllIpAsync(3);
 }

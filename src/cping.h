@@ -43,12 +43,6 @@ private:
     QTimer timerPingAllIp;
     QTimer timerPingAllIpAsync;
 
-private slots:
-    void pingOneIpByTimer();
-    void pingAllIpByTimer();
-    void pingAllIpByTimerAsync();
-    void pingOneIpByTimerAsync();
-
 signals:
     void pingAllIpAsyncStart(QVector<QString> ip);
     void pingOneIpAsyncStart(QString ip);

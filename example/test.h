@@ -30,8 +30,8 @@ public:
 //        cping->pingAllIpAsync(2);
 //        cping->pingOneIpAsync();
 //        cping->startPingAllIpByTimer(500);
-//        cping->startPingOneIpByTimer(500, 1);
-        cping->startPingAllIpByTimerAsync(500);
+        cping->startPingOneIpByTimer(500, 1);
+//        cping->startPingAllIpByTimerAsync(500);
 //        cping->startPingOneIpByTimerAsync(500, 1);
 
         qDebug() << "test";
