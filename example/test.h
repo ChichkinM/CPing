@@ -28,11 +28,16 @@ public:
 //            qDebug() << r.ip << r.result << r.tripTime;
 
 //        cping->pingAllIpAsync(2);
-//        cping->pingOneIpAsync();
+
+//        cping->pingOneIpAsync(0);
+//        cping->pingOneIpAsync(1);
+//        cping->pingOneIpAsync(1);
+
 //        cping->startPingAllIpByTimer(500);
-        cping->startPingOneIpByTimer(500, 1);
+
+//        cping->startPingOneIpByTimer(500, 1);
 //        cping->startPingAllIpByTimerAsync(500);
-//        cping->startPingOneIpByTimerAsync(500, 1);
+        cping->startPingOneIpByTimerAsync(500, 1);
 
         qDebug() << "test";
     }

@@ -16,9 +16,10 @@ public:
     CPing(QVector<QString> ipAddresses, QObject *parent = 0);
     ~CPing();
 
-    ICPingOS *ping = nullptr;
+    ICPingOS *pingSync = nullptr;
 //    ICPingOS *pingAsync = nullptr;
-    QVector<ICPingOS*> pings;
+    QVector<ICPingOS*> pingsAsyncForPingAll;
+    QVector<ICPingOS*> pingsAsyncForPingOne;
 
     QVector<ICPingOS::CPingResponse> pingAllIp();
     ICPingOS::CPingResponse pingOneIp(int index = 0);
@@ -32,6 +33,7 @@ public:
 
 private:
     void init();
+    void workWithMaxThreadCount(int newTaskCount);
 
     QThreadPool threadPool;
     QVector<QString> ipAddresses;
