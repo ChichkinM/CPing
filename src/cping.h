@@ -28,7 +28,7 @@ public:
     void startPingOneIpByTimer(int interval, int index = 0);
     void startPingOneIpByTimerAsync(int interval, int index = 0);
     void startPingAllIpByTimer(int interval);
-    void startPingAllIpByTimerAsync(int interval);
+    void startPingAllIpByTimerAsync(int interval, int threads = 1);
 
 private:
     void init();
@@ -39,6 +39,8 @@ private:
 
     int indexIpAdrForTimerPingOneIp = 0;
     int indexIpAdrForTimerPingOneIpAsync = 0;
+    int threadsForTimerPingAllIpAsync = 1;
+
     QTimer timerPingOneIp;
     QTimer timerPingOneIpAsync;
     QTimer timerPingAllIp;
