@@ -14,12 +14,10 @@ class CPingWindows :  public ICPingOS
 public:
     CPingWindows(QObject *parent = nullptr);
 
-    CPingResponse pingOneIp(QString ip);
     QVector<CPingResponse> pingAllIp(QVector<QString> ip);
 
-public slots:
-    void pingAllIpAsync(QVector<QString> ip);
-    void pingOneIpAsync(QString ip);
+private:
+    ICPingOS::CPingResponse pingOneIp(QString ip);
 };
 
 #endif // CPINGWINDOWS_H

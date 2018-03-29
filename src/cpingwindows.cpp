@@ -48,11 +48,3 @@ QVector<ICPingOS::CPingResponse> CPingWindows::pingAllIp(QVector<QString> ip) {
 
     return result;
 }
-
-void CPingWindows::pingAllIpAsync(QVector<QString> ip) {
-    emit responsePingAllIpAsync(pingAllIp(ip));
-}
-
-void CPingWindows::pingOneIpAsync(QString ip) {
-    emit responsePingOneIpAsync(pingOneIp(ip));
-}

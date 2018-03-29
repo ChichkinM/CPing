@@ -15,58 +15,93 @@ CPing::CPing(QObject *parent) : QObject(parent) {
 }
 
 CPing::CPing(QString ipAddress, QObject *parent) : QObject(parent) {
-    init();
     ipAddresses.append(ipAddress);
+    init();
 }
 
 CPing::CPing(QVector<QString> ipAddresses, QObject *parent) : QObject(parent) {
-    init();
     for (QString oneIp : ipAddresses)
         this->ipAddresses.append(oneIp);
+    init();
 }
 
 CPing::~CPing() {
-    thread.quit();
-    thread.wait();
+    delete threadPool;
 
-    delete ping;
+    for(ICPingOS *p : pingsAsyncForPingAll) delete p;
+    for(ICPingOS *p : pingsAsyncForPingOne) delete p;
+    delete pingSync;
 }
 
 void CPing::init() {
+    threadPool = new QThreadPool;
+    threadPool->setMaxThreadCount(1);
+
+    for(int i = 0; i < ipAddresses.count(); i++) {
 #ifdef _WIN32
-    ping = new CPingWindows();
-    pingAsync = new CPingWindows();
+        pingsAsyncForPingAll.append(new CPingWindows);
+        pingsAsyncForPingOne.append(new CPingWindows);
+        if (pingSync == nullptr)
+            pingSync = new CPingWindows;
 #elif __linux__
-    ping = new CPingLinux();
-    pingAsync = new CPingLinux();
+        pingsAsyncForPingAll.append(new CPingLinux);
+        pingsAsyncForPingOne.append(new CPingLinux);
+        if (pingSync == nullptr)
+            pingSync = new CPingLinux;
 #endif
+    }
 
-    connect(&timerPingOneIp, SIGNAL(timeout()), this, SLOT(pingOneIpByTimer()));
-    connect(&timerPingAllIp, SIGNAL(timeout()), this, SLOT(pingAllIpByTimer()));
-    connect(&timerPingAllIpAsync, SIGNAL(timeout()), this, SLOT(pingAllIpByTimerAsync()));
-    connect(&timerPingOneIpAsync, SIGNAL(timeout()), this, SLOT(pingOneIpByTimerAsync()));
+    qRegisterMetaType<QVector<QString>>("QVector<QString>");
+    qRegisterMetaType<ICPingOS::CPingResponse>("ICPingOS::CPingResponse");
+    qRegisterMetaType<QVector<ICPingOS::CPingResponse>>("QVector<ICPingOS::CPingResponse>");
 
-    if (pingAsync != nullptr) {
-        pingAsync->moveToThread(&thread);
+    for (ICPingOS *p : pingsAsyncForPingAll) {
+        p->setAutoDelete(false);
+        connect(p, &ICPingOS::responsePingAllIpAsync, this, &CPing::responsePingAllIpAsyncAggregator);
+    }
 
-        qRegisterMetaType<QVector<QString>>("QVector<QString>");
-        qRegisterMetaType<ICPingOS::CPingResponse>("ICPingOS::CPingResponse");
-        qRegisterMetaType<QVector<ICPingOS::CPingResponse>>("QVector<ICPingOS::CPingResponse>");
+    int i = 0;
+    for(ICPingOS *p : pingsAsyncForPingOne) {
+        p->setAutoDelete(false);
+        p->setIpForAsyncPing({ipAddresses.at(i)});
+        connect(p, &ICPingOS::responsePingAllIpAsync, this, &CPing::responsePingAllIpAsync);
+        i++;
+    }
 
-        connect(&thread, &QThread::finished, pingAsync, &QObject::deleteLater);
-        connect(this, &CPing::pingAllIpAsyncStart, pingAsync, &ICPingOS::pingAllIpAsync);
-        connect(this, &CPing::pingOneIpAsyncStart, pingAsync, &ICPingOS::pingOneIpAsync);
-        connect(pingAsync, &ICPingOS::responsePingAllIpAsync, this, &CPing::responsePingAllIpAsync);
-        connect(pingAsync, &ICPingOS::responsePingOneIpAsync, this, &CPing::responsePingOneIpAsync);
+    connect(&timerPingAllIpAsync, &QTimer::timeout, this, [this](){ pingAllIpAsync(threadsForTimerPingAllIpAsync); });
+    connect(&timerPingOneIpAsync, &QTimer::timeout, this, [this](){ pingOneIpAsync(indexIpAdrForTimerPingOneIpAsync); });
+
+    connect(&timerPingOneIp, &QTimer::timeout, this, [this](){
+        emit responsePingAllIp( {
+                                    pingOneIp(indexIpAdrForTimerPingOneIp)}); });
+    connect(&timerPingAllIp, &QTimer::timeout, this, [this](){
+        emit responsePingAllIp(
+                    pingAllIp()); });
+}
+
+void CPing::workWithMaxThreadCount(int newTaskCount) {
+    int freeThreads = threadPool->maxThreadCount() - threadPool->activeThreadCount();
+    if (freeThreads < newTaskCount) {
+        int additionalthreads = newTaskCount - freeThreads;
+        threadPool->setMaxThreadCount(threadPool->maxThreadCount() + additionalthreads);
     }
 }
+
+void CPing::responsePingAllIpAsyncAggregator(QVector<ICPingOS::CPingResponse> result) {
+    agregatorResult << result;
+    if (agregatorResult.count() == ipAddresses.count()) {
+        emit responsePingAllIpAsync(agregatorResult);
+        agregatorResult.clear();
+    }
+}
+
 
 
 QVector<ICPingOS::CPingResponse> CPing::pingAllIp() {
     QVector<ICPingOS::CPingResponse> result;
 
-    if (ping != nullptr)
-        result = ping->pingAllIp(ipAddresses);
+    if (pingSync != nullptr)
+        result = pingSync->pingAllIp(ipAddresses);
 
     return result;
 }
@@ -75,25 +110,38 @@ ICPingOS::CPingResponse CPing::pingOneIp(int index) {
     ICPingOS::CPingResponse result;
 
     if (ipAddresses.length() > index) {
-        if (ping != nullptr)
-            result = ping->pingOneIp(ipAddresses.at(index));
+        if (pingSync != nullptr)
+            result = pingSync->pingAllIp({ipAddresses.at(index)}).at(0);
     }
 
     return result;
 }
 
-void CPing::pingAllIpAsync() {
-    if (!thread.isRunning())
-        thread.start();
-    emit pingAllIpAsyncStart(ipAddresses);
+void CPing::pingAllIpAsync(unsigned int threads) {
+    if (threads > 0) {
+        workWithMaxThreadCount(threads);
+
+        int ipCountForDefThread = ipAddresses.count() / threads;
+
+        for(unsigned int i = 0; i < threads; i++) {
+            QVector<QString> ip;
+            int additionalIpCount = ipAddresses.count() % threads;
+            if (i == 0)
+                ip << ipAddresses.mid(i, ipCountForDefThread + additionalIpCount);
+            else
+                ip << ipAddresses.mid(i + additionalIpCount, ipCountForDefThread);
+
+            pingsAsyncForPingAll.at(i)->setIpForAsyncPing(ip);
+            threadPool->start(pingsAsyncForPingAll.at(i));
+        }
+    }
 }
 
 void CPing::pingOneIpAsync(int index) {
-    if (!thread.isRunning())
-        thread.start();
-
-    if (ipAddresses.length() > index)
-        emit pingOneIpAsyncStart(ipAddresses.at(index));
+    if (ipAddresses.length() > index) {
+        workWithMaxThreadCount(1);
+        threadPool->start(pingsAsyncForPingOne.at(index));
+    }
 }
 
 void CPing::startPingOneIpByTimer(int interval, int index) {
@@ -105,8 +153,8 @@ void CPing::startPingOneIpByTimer(int interval, int index) {
 
 void CPing::startPingOneIpByTimerAsync(int interval, int index) {
     if (!timerPingOneIpAsync.isActive() && ipAddresses.length() > index) {
-        timerPingOneIpAsync.start(interval);
         indexIpAdrForTimerPingOneIpAsync = index;
+        timerPingOneIpAsync.start(interval);
     }
 }
 
@@ -115,29 +163,9 @@ void CPing::startPingAllIpByTimer(int interval) {
         timerPingAllIp.start(interval);
 }
 
-void CPing::startPingAllIpByTimerAsync(int interval) {
-    if (!timerPingAllIpAsync.isActive())
+void CPing::startPingAllIpByTimerAsync(int interval, int threads) {
+    if (!timerPingAllIpAsync.isActive()) {
+        threadsForTimerPingAllIpAsync = threads;
         timerPingAllIpAsync.start(interval);
-}
-
-void CPing::pingOneIpByTimer() {
-    emit responsePingOneIp(
-                pingOneIp(indexIpAdrForTimerPingOneIp));
-}
-
-void CPing::pingOneIpByTimerAsync() {
-    if (!thread.isRunning())
-        thread.start();
-    emit pingOneIpAsyncStart(ipAddresses.at(indexIpAdrForTimerPingOneIpAsync));
-}
-
-void CPing::pingAllIpByTimer() {
-    emit responsePingAllIp(
-                pingAllIp());
-}
-
-void CPing::pingAllIpByTimerAsync() {
-    if (!thread.isRunning())
-        thread.start();
-    emit pingAllIpAsyncStart(ipAddresses);
+    }
 }
