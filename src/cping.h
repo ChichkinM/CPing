@@ -55,12 +55,8 @@ signals:
     void pingAllIpAsyncStart(QVector<QString> ip);
     void pingOneIpAsyncStart(QString ip);
 
-
     void responsePingAllIpAsync(QVector<ICPingOS::CPingResponse>);
-    void responsePingOneIpAsync(ICPingOS::CPingResponse);
-
     void responsePingAllIp(QVector<ICPingOS::CPingResponse>);
-    void responsePingOneIp(ICPingOS::CPingResponse);
 };
 
 #endif // CPING_H

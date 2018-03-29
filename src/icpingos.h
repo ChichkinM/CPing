@@ -62,19 +62,17 @@ public:
     void run() { pingAllIpAsync(ipForPing); }
     void setIpForAsyncPing(QVector<QString> ip) { ipForPing = ip; }
 
-    virtual CPingResponse pingOneIp(QString ip) = 0;
+//    virtual CPingResponse pingOneIp(QString ip) = 0;
     virtual QVector<ICPingOS::CPingResponse> pingAllIp(QVector<QString> ip) = 0;
 
 private:
     QVector<QString> ipForPing;
 
 public slots:
-    virtual void pingAllIpAsync(QVector<QString> ip) = 0;
-    virtual void pingOneIpAsync(QString ip) = 0;
+    virtual void pingAllIpAsync(QVector<QString> ip) { emit responsePingAllIpAsync(pingAllIp(ip)); }
 
 signals:
     void responsePingAllIpAsync(QVector<ICPingOS::CPingResponse>);
-    void responsePingOneIpAsync(ICPingOS::CPingResponse);
 };
 
 #endif // ICPINGOS_H

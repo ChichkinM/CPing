@@ -14,11 +14,6 @@ public:
                 SLOT(onResponsePingAllIp(QVector<ICPingOS::CPingResponse>)));
         connect(cping, SIGNAL(responsePingAllIp(QVector<ICPingOS::CPingResponse>)), this,
                 SLOT(onResponsePingAllIp(QVector<ICPingOS::CPingResponse>)));
-        connect(cping, SIGNAL(responsePingOneIp(ICPingOS::CPingResponse)), this,
-                SLOT(onResponsePingOneIp(ICPingOS::CPingResponse)));
-        connect(cping, SIGNAL(responsePingOneIpAsync(ICPingOS::CPingResponse)), this,
-                SLOT(onResponsePingOneIp(ICPingOS::CPingResponse)));
-
 
 
 //        ICPingOS::CPingResponse r = cping->pingOneIp(2);
@@ -36,7 +31,7 @@ public:
 //        cping->startPingAllIpByTimer(500);
 //        cping->startPingOneIpByTimer(500, 1);
 
-        cping->startPingAllIpByTimerAsync(500, 3);
+//        cping->startPingAllIpByTimerAsync(500, 3);
 //        cping->startPingOneIpByTimerAsync(500, 1);
 
         qDebug() << "test";
@@ -49,14 +44,9 @@ private:
 
 private slots:
     void onResponsePingAllIp(QVector<ICPingOS::CPingResponse> result) {
-        qDebug() << "onResponsePingAllIp";
+        qDebug() << "ping result";
         for (ICPingOS::CPingResponse r : result)
             qDebug() << r.ip << r.result << r.tripTime;
-    }
-
-    void onResponsePingOneIp(ICPingOS::CPingResponse result) {
-        qDebug() << "onResponsePingOneIp";
-            qDebug() << result.ip << result.result << result.tripTime;
     }
 };
 

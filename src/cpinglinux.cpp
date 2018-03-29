@@ -185,14 +185,6 @@ QVector<ICPingOS::CPingResponse> CPingLinux::pingAllIp(QVector<QString> ip) {
     return result;
 }
 
-void CPingLinux::pingAllIpAsync(QVector<QString> ip) {
-    emit responsePingAllIpAsync(pingAllIp(ip));
-}
-
-void CPingLinux::pingOneIpAsync(QString ip) {
-    emit responsePingOneIpAsync(pingOneIp(ip));
-}
-
 unsigned short CPingLinux::in_cksum(unsigned short *addr, int len)
 {
     int				nleft = len;
