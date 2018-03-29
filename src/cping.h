@@ -17,7 +17,6 @@ public:
     ~CPing();
 
     ICPingOS *pingSync = nullptr;
-//    ICPingOS *pingAsync = nullptr;
     QVector<ICPingOS*> pingsAsyncForPingAll;
     QVector<ICPingOS*> pingsAsyncForPingOne;
 
@@ -44,6 +43,11 @@ private:
     QTimer timerPingOneIpAsync;
     QTimer timerPingAllIp;
     QTimer timerPingAllIpAsync;
+
+    QVector<ICPingOS::CPingResponse> agregatorResult;
+
+private slots:
+    void responsePingAllIpAsyncAggregator(QVector<ICPingOS::CPingResponse> result);
 
 signals:
     void pingAllIpAsyncStart(QVector<QString> ip);
