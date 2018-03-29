@@ -11,7 +11,6 @@ class ICPingOS : public QObject, public QRunnable {
     Q_OBJECT
 public:
     ICPingOS(QObject *parent = nullptr) : QObject(parent) { }
-    ~ICPingOS() { qDebug() << "del icpingos"; }
 
     enum CPingResult {
         SUCCESS =                   0,

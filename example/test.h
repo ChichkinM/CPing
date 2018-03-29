@@ -22,7 +22,7 @@ public:
 //        for (ICPingOS::CPingResponse r : cping->pingAllIp())
 //            qDebug() << r.ip << r.result << r.tripTime;
 
-        cping->pingAllIpAsync(3);
+//        cping->pingAllIpAsync(3);
 //        cping->pingAllIpAsync(3);
 
 //        cping->pingOneIpAsync(0);

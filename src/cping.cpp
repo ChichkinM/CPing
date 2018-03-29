@@ -39,8 +39,8 @@ void CPing::init() {
 
     for(int i = 0; i < ipAddresses.count(); i++) {
 #ifdef _WIN32
-        pingsAsync.append(new CPingWindows);
-        pingsSync.append(new CPingWindows);
+        pingsAsyncForPingAll.append(new CPingWindows);
+        pingsAsyncForPingOne.append(new CPingWindows);
         if (pingSync == nullptr)
             pingSync = new CPingWindows;
 #elif __linux__
@@ -80,17 +80,11 @@ void CPing::init() {
 }
 
 void CPing::workWithMaxThreadCount(int newTaskCount) {
-    qDebug() << "******* start work with threads *******";
     int freeThreads = threadPool->maxThreadCount() - threadPool->activeThreadCount();
     if (freeThreads < newTaskCount) {
         int additionalthreads = newTaskCount - freeThreads;
-//        qDebug() << "add" << additionalthreads;
         threadPool->setMaxThreadCount(threadPool->maxThreadCount() + additionalthreads);
     }
-
-    qDebug() << "max threads" << threadPool->maxThreadCount();
-    qDebug() << "active threads" << threadPool->activeThreadCount();
-    qDebug() << "******* end work with threads *******";
 }
 
 void CPing::responsePingAllIpAsyncAggregator(QVector<ICPingOS::CPingResponse> result) {
