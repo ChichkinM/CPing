@@ -26,15 +26,16 @@ CPing::CPing(QVector<QString> ipAddresses, QObject *parent) : QObject(parent) {
 }
 
 CPing::~CPing() {
-    //    thread.quit();
-    //    thread.wait();
-    //TODO: add normal quit threadPool
+    delete threadPool;
 
+    for(ICPingOS *p : pingsAsyncForPingAll) delete p;
+    for(ICPingOS *p : pingsAsyncForPingOne) delete p;
     delete pingSync;
 }
 
 void CPing::init() {
-    threadPool.setMaxThreadCount(1);
+    threadPool = new QThreadPool;
+    threadPool->setMaxThreadCount(1);
 
     for(int i = 0; i < ipAddresses.count(); i++) {
 #ifdef _WIN32
@@ -79,17 +80,17 @@ void CPing::init() {
 }
 
 void CPing::workWithMaxThreadCount(int newTaskCount) {
-//    qDebug() << "******* start work with threads *******";
-    int freeThreads = threadPool.maxThreadCount() - threadPool.activeThreadCount();
+    qDebug() << "******* start work with threads *******";
+    int freeThreads = threadPool->maxThreadCount() - threadPool->activeThreadCount();
     if (freeThreads < newTaskCount) {
         int additionalthreads = newTaskCount - freeThreads;
 //        qDebug() << "add" << additionalthreads;
-        threadPool.setMaxThreadCount(threadPool.maxThreadCount() + additionalthreads);
+        threadPool->setMaxThreadCount(threadPool->maxThreadCount() + additionalthreads);
     }
 
-//    qDebug() << "max threads" << threadPool.maxThreadCount();
-//    qDebug() << "active threads" << threadPool.activeThreadCount();
-//    qDebug() << "******* end work with threads *******";
+    qDebug() << "max threads" << threadPool->maxThreadCount();
+    qDebug() << "active threads" << threadPool->activeThreadCount();
+    qDebug() << "******* end work with threads *******";
 }
 
 void CPing::responsePingAllIpAsyncAggregator(QVector<ICPingOS::CPingResponse> result) {
@@ -128,7 +129,7 @@ void CPing::pingAllIpAsync(unsigned int threads) {
 
         int ipCountForDefThread = ipAddresses.count() / threads;
 
-        for(int i = 0; i < threads; i++) {
+        for(unsigned int i = 0; i < threads; i++) {
             QVector<QString> ip;
             int additionalIpCount = ipAddresses.count() % threads;
             if (i == 0)
@@ -137,7 +138,7 @@ void CPing::pingAllIpAsync(unsigned int threads) {
                 ip << ipAddresses.mid(i + additionalIpCount, ipCountForDefThread);
 
             pingsAsyncForPingAll.at(i)->setIpForAsyncPing(ip);
-            threadPool.start(pingsAsyncForPingAll.at(i));
+            threadPool->start(pingsAsyncForPingAll.at(i));
         }
     }
 }
@@ -145,7 +146,7 @@ void CPing::pingAllIpAsync(unsigned int threads) {
 void CPing::pingOneIpAsync(int index) {
     if (ipAddresses.length() > index) {
         workWithMaxThreadCount(1);
-        threadPool.start(pingsAsyncForPingOne.at(index));
+        threadPool->start(pingsAsyncForPingOne.at(index));
     }
 }
 

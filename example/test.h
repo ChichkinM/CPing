@@ -22,6 +22,7 @@ public:
 //        for (ICPingOS::CPingResponse r : cping->pingAllIp())
 //            qDebug() << r.ip << r.result << r.tripTime;
 
+        cping->pingAllIpAsync(3);
 //        cping->pingAllIpAsync(3);
 
 //        cping->pingOneIpAsync(0);
@@ -35,6 +36,8 @@ public:
 //        cping->startPingOneIpByTimerAsync(500, 1);
 
         qDebug() << "test";
+
+//        QTimer::singleShot(100, this, [this](){ qDebug() << "del"; delete cping;});
     }
 
     ~Test() { delete cping; }

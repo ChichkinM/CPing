@@ -11,6 +11,7 @@ class ICPingOS : public QObject, public QRunnable {
     Q_OBJECT
 public:
     ICPingOS(QObject *parent = nullptr) : QObject(parent) { }
+    ~ICPingOS() { qDebug() << "del icpingos"; }
 
     enum CPingResult {
         SUCCESS =                   0,
@@ -62,7 +63,6 @@ public:
     void run() { pingAllIpAsync(ipForPing); }
     void setIpForAsyncPing(QVector<QString> ip) { ipForPing = ip; }
 
-//    virtual CPingResponse pingOneIp(QString ip) = 0;
     virtual QVector<ICPingOS::CPingResponse> pingAllIp(QVector<QString> ip) = 0;
 
 private:

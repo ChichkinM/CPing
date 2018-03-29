@@ -34,7 +34,7 @@ private:
     void init();
     void workWithMaxThreadCount(int newTaskCount);
 
-    QThreadPool threadPool;
+    QThreadPool *threadPool = nullptr;
     QVector<QString> ipAddresses;
 
     int indexIpAdrForTimerPingOneIp = 0;
