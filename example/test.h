@@ -8,7 +8,7 @@ class Test : public QObject {
     Q_OBJECT
 public:
     Test() : QObject() {
-        cping = new CPing({ "8.8.8.8", "8.8.8.9", "10.7.16.208" });
+        cping = new CPing({ "8.8.8.8", "8.8.8.9", "10.7.16.208" }, 3);
 
         connect(cping, SIGNAL(responsePingAllIpAsync(QVector<ICPingOS::CPingResponse>)), this,
                 SLOT(onResponsePingAllIp(QVector<ICPingOS::CPingResponse>)));
@@ -22,8 +22,8 @@ public:
 //        for (ICPingOS::CPingResponse r : cping->pingAllIp())
 //            qDebug() << r.ip << r.result << r.tripTime;
 
-//        cping->pingAllIpAsync(3);
-//        cping->pingAllIpAsync(3);
+//        cping->pingAllIpAsync();
+//        cping->pingAllIpAsync();
 
 //        cping->pingOneIpAsync(0);
 //        cping->pingOneIpAsync(1);
@@ -32,12 +32,12 @@ public:
 //        cping->startPingAllIpByTimer(500);
 //        cping->startPingOneIpByTimer(500, 1);
 
-//        cping->startPingAllIpByTimerAsync(500, 3);
+//        cping->startPingAllIpByTimerAsync(500);
 //        cping->startPingOneIpByTimerAsync(500, 1);
 
         qDebug() << "test";
 
-//        QTimer::singleShot(100, this, [this](){ qDebug() << "del"; delete cping;});
+//        QTimer::singleShot(100, [this](){ qDebug() << "del"; delete cping;});
     }
 
     ~Test() { delete cping; }
