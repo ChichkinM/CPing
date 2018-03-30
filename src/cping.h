@@ -12,8 +12,8 @@ class CPing : public QObject
     Q_OBJECT
 public:
     CPing(QObject *parent = 0);
-    CPing(QString ipAddress, QObject *parent = 0);
-    CPing(QVector<QString> ipAddresses, QObject *parent = 0);
+    CPing(QString ipAddress, unsigned int threadsForAsync = 0, QObject *parent = 0);
+    CPing(QVector<QString> ipAddresses, unsigned int threadsForAsync = 0, QObject *parent = 0);
     ~CPing();
 
     ICPingOS *pingSync = nullptr;
@@ -23,23 +23,22 @@ public:
     QVector<ICPingOS::CPingResponse> pingAllIp();
     ICPingOS::CPingResponse pingOneIp(int index = 0);
     void pingOneIpAsync(int index = 0);
-    void pingAllIpAsync(unsigned int threads = 1);
+    void pingAllIpAsync();
 
     void startPingOneIpByTimer(int interval, int index = 0);
     void startPingOneIpByTimerAsync(int interval, int index = 0);
     void startPingAllIpByTimer(int interval);
-    void startPingAllIpByTimerAsync(int interval, int threads = 1);
+    void startPingAllIpByTimerAsync(int interval);
 
 private:
-    void init();
-    void workWithMaxThreadCount(int newTaskCount);
+    void init(unsigned int threadsForAsync);
+    void threadPoolInit(unsigned int threads);
 
     QThreadPool *threadPool = nullptr;
     QVector<QString> ipAddresses;
 
     int indexIpAdrForTimerPingOneIp = 0;
     int indexIpAdrForTimerPingOneIpAsync = 0;
-    int threadsForTimerPingAllIpAsync = 1;
 
     QTimer timerPingOneIp;
     QTimer timerPingOneIpAsync;
