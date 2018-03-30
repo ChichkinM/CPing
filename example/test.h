@@ -35,6 +35,10 @@ public:
 //        cping->startPingAllIpByTimerAsync(500);
 //        cping->startPingOneIpByTimerAsync(500, 1);
 
+//        QTimer *t = new QTimer;
+//        connect(t, &QTimer::timeout, this, [this](){ qDebug() << "500";});
+//        t->start(500);
+
         qDebug() << "test";
 
 //        QTimer::singleShot(100, [this](){ qDebug() << "del"; delete cping;});
