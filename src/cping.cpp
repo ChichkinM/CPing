@@ -126,9 +126,9 @@ void CPing::pingAllIpAsync() {
         QVector<QString> ip;
         int additionalIpCount = ipAddresses.count() % threads;
         if (i == 0)
-            ip << ipAddresses.mid(i, ipCountForDefThread + additionalIpCount);
+            ip << ipAddresses.mid(0, ipCountForDefThread + additionalIpCount);
         else
-            ip << ipAddresses.mid(i + additionalIpCount, ipCountForDefThread);
+            ip << ipAddresses.mid(i * ipCountForDefThread + additionalIpCount, ipCountForDefThread);
 
 
         pingsAsyncForPingAll.at(i)->setIpForAsyncPing(ip);
