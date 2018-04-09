@@ -87,10 +87,8 @@ void CPing::init( unsigned int threadsForAsync) {
 
 void CPing::responsePingAllIpAsyncAggregator(QVector<ICPingOS::CPingResponse> result) {
     agregatorResult << result;
-    if (agregatorResult.count() == ipAddresses.count()) {
+    if (agregatorResult.count() == ipAddresses.count())
         emit responsePingAllIpAsync(agregatorResult);
-        agregatorResult.clear();
-    }
 }
 
 
@@ -117,6 +115,8 @@ ICPingOS::CPingResponse CPing::pingOneIp(int index) {
 
 void CPing::pingAllIpAsync() {
     threadPoolInit(ipAddresses.count());
+
+    agregatorResult.clear();
 
     int threads = ipAddresses.count() <= threadPool->maxThreadCount() ?
                 ipAddresses.count() : threadPool->maxThreadCount();
